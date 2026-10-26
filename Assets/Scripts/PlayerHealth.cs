@@ -56,6 +56,6 @@ public class PlayerHealth : LivingEntity
         playerMovement.enabled = false;
         playerInput.enabled = false;
 
-
+        uiHealth.gameObject.SetActive(false);
     }
 }

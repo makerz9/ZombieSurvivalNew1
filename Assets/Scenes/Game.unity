@@ -1780,7 +1780,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1991925466}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bdb0c992451b48c4891f9d497883e58b, type: 3}
+  m_Script: {fileID: 11500000, guid: 1687e241036e86f4db2faff3cbda5920, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ZombieSpawner
   uiManager: {fileID: 741054173}

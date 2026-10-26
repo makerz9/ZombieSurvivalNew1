@@ -9,10 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe947cd3bcd753640b432fbc9c8a5244, type: 3}
+  m_Script: {fileID: 11500000, guid: 8dd01e56522b14144b45d53332de9d7b, type: 3}
   m_Name: ZombieData
   m_EditorClassIdentifier: Assembly-CSharp::ZombieData
-  maxHP: 100
+  maxHp: 100
   damage: 20
   speed: 2
   skinColor: {r: 1, g: 1, b: 1, a: 1}

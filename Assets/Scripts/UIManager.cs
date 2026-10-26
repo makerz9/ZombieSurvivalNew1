@@ -8,7 +8,7 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        //SetAmmoText(0, 0);
+        SetAmmoText(0, 0);
     }
 
     public void SetAmmoText(int magAmmo, int remainAmmo)
@@ -18,6 +18,6 @@ public class UIManager : MonoBehaviour
 
     public void SetWaveText(int wave, int count)
     {
-        waveInfoText.text = $"Wave {wave}\n Enemy Left: {count}";
+        waveInfoText.text = $"Wave: {wave}\nEnemy Left: {count}";
     }
 }
