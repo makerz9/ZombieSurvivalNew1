@@ -1,5 +1,7 @@
-using System;
+
+using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.AI;
 
 public class Zombie : LivingEntity
@@ -8,21 +10,20 @@ public class Zombie : LivingEntity
     {
         Idle,
         Trace,
-
         Attack,
-        Die
+        Die,
     }
     
-
     public Transform target;
     public LayerMask targetLayer;
 
-    public float traceDistance = 10f;
+    public Image uiZombieHealth;
+    public float traceDistance = 8f;
+    public float attackDistance = 1f; //이 시도는 맞았음
 
     public ParticleSystem bloodEffect;
     public Collider zombieCollider;
-    public Renderer zombieRenderer;//좀비마다 색 바꿔줄때 쓸려고
-
+    public Renderer zombieRenderer;
     public AudioClip hitClip;
     public AudioClip deathClip;
 
@@ -30,52 +31,65 @@ public class Zombie : LivingEntity
     private Animator zombieAnimator;
     private AudioSource zombieAudioSource;
 
+    public GameObject zombieHitBox;
+
     public float damage = 10;
+    public float attackInterval = 1f;
     private float lastAttackTime;
 
     private Status currentStatus;
+
     public static readonly int IdHasTarget = Animator.StringToHash("HasTarget");
-        public static readonly int IdDie = Animator.StringToHash("Die");
+    public static readonly int IdDie = Animator.StringToHash("Die");
 
     public Status CurrentStatus
     {
-        get => currentStatus; //그냥 리턴
+        get => currentStatus;
         set
         {
             currentStatus = value;
             Debug.Log(currentStatus);
-
-            //스위치문
             switch (currentStatus)
             {
                 case Status.Idle:
-                    zombieAnimator.SetBool("HasTarget", false);
+                    zombieAnimator.SetBool(IdHasTarget, false);
                     agent.isStopped = true;
                     break;
                 case Status.Trace:
-                    zombieAnimator.SetBool("HasTarget", true);
+                    zombieAnimator.SetBool(IdHasTarget, true);
                     agent.isStopped = false;
                     break;
-
-
                 case Status.Attack:
-                    zombieAnimator.SetBool("HasTarget", false);
+                    zombieAnimator.SetBool(IdHasTarget, false);
                     agent.isStopped = true;
+
                     break;
                 case Status.Die:
                     agent.isStopped = true;
-                    zombieAnimator.SetTrigger("IdDie");
+                    zombieAnimator.SetTrigger(IdDie);
                     zombieCollider.enabled = false;
                     zombieAudioSource.PlayOneShot(deathClip);
+                    //deactiveTime = Time.time + 5f;
                     break;
-                    //열거형 스위치 사용가능
-
             }
         }
-
-        
-        
     }
+
+    //매개변수로 스크립터블데이터를 받아서 세팅하는 함수
+    public void Setup(ZombieData data)
+    {
+        startingHealth = data.maxHP;
+        damage = data.damage;
+
+        //이동은 네비게이션이담당
+        //1이다 = 1초당 유니티단위로 1거리만큼이동
+        agent.speed = data.speed;
+        zombieRenderer.material.color = data.skinColor;
+        
+        OnEnable();
+        //Debug.Log("셋업");
+    }
+
     private void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -83,142 +97,191 @@ public class Zombie : LivingEntity
         zombieAudioSource = GetComponent<AudioSource>();
     }
 
-
-    //초기화 부분
     protected override void OnEnable()
     {
         base.OnEnable();
-
         agent.enabled = true;
-        agent.ResetPath();//네비메시 에이전트가 이동할때 경로를 계산하는데 그 경로를 초기화
 
-
-
-        if(NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 10f, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(transform.position, out NavMeshHit hit, 10f, NavMesh.AllAreas))
         {
             agent.Warp(hit.position);
         }
 
+
+
+
         zombieCollider.enabled = true;
+
         CurrentStatus = Status.Idle;
 
-    }
-    
+        uiZombieHealth.gameObject.SetActive(true);
+        uiZombieHealth.fillAmount = Health / startingHealth;
 
-    void Update()
+    }
+
+    private void OnDisable()
     {
-        switch (currentStatus)
+        if(agent.isOnNavMesh)
+        {
+            agent.ResetPath();
+        }
+    }
+
+
+    private void Update()
+    {
+        switch (CurrentStatus)
         {
             case Status.Idle:
-            UpdateIdle();
+                UpdateIdle();
                 break;
             case Status.Trace:
-            UpdateTrace();
+                UpdateTrace();
                 break;
             case Status.Attack:
-            UpdateAttack();
+                UpdateAttack();
                 break;
             case Status.Die:
-            UpdateDie();
+                UpdateDie();
                 break;
-                //열거영 스위치 사용가능
-
-        }
-
-        if(Input.GetKeyDown(KeyCode.Space))
-        {
-            OnDamage(10f, Vector3.zero, Vector3.zero);
         }
     }
+
+
 
     private void UpdateDie()
     {
-        throw new NotImplementedException();
+
     }
 
     private void UpdateAttack()
     {
-        throw new NotImplementedException();
+
+        //이 시도도 맞았음
+        if (target == null || Vector3.Distance(transform.position, target.position) > attackDistance)
+        {
+
+            CurrentStatus = Status.Trace;
+            return;
+        }
+
+        //!@# 공격시간 계산
+        if(Time.time >= lastAttackTime + attackInterval)
+        {
+            lastAttackTime = Time.time;
+
+            IDamageable damageable = target.GetComponent<IDamageable>();
+            var hitNormal = (transform.position - target.position).normalized;
+            damageable.OnDamage(damage, target.position, hitNormal);
+
+
+        }
+
     }
 
     private void UpdateTrace()
     {
-        if(target == null || Vector3.Distance(transform.position, target.position) > traceDistance)
+
+        //이 시도도 맞았음
+        //우선순위따라 위로 올리고 return 해야 상태 겹치는걸 방지
+        if (target != null && Vector3.Distance(transform.position, target.position) < attackDistance)
+        {
+            //target = null;
+            CurrentStatus = Status.Attack;
+            return;
+        }
+
+        if (target == null || Vector3.Distance(transform.position, target.position) > traceDistance)
         {
             target = null;
             CurrentStatus = Status.Idle;
             return;
         }
 
-        //호출할때마다 새 경로가 만들어짐
+
         agent.SetDestination(target.position);
     }
 
     private void UpdateIdle()
     {
-        
-        if(target != null && Vector3.Distance(target.position, transform.position) < traceDistance)
+        if (target != null && Vector3.Distance(transform.position, target.position) < traceDistance)
         {
-            //타겟이 있고, 타겟과의 거리가 traceDistance보다 작으면 추적상태로 바꿔라
             CurrentStatus = Status.Trace;
             return;
         }
+
+
+
 
         target = FindTarget(traceDistance);
     }
 
     private Transform FindTarget(float radius)
     {
-        //필요한 중점, 반경, 레이어
         Collider[] colliders = Physics.OverlapSphere(transform.position, radius, targetLayer);
 
-        //이 레이어에 들어온 특정 오브젝트를 모두찾아 배열에 넣음
-
         Transform closet = null;
-        float closetDistance = float.MaxValue;
+        float closetDistacne = float.MaxValue;
 
-        for(int i = 0; i < colliders.Length; i++)
+        for (int i = 0; i < colliders.Length; ++i)
         {
             float distance = Vector3.Distance(transform.position, colliders[i].transform.position);
-
-            if(distance < closetDistance)
+            if (distance < closetDistacne)
             {
-                closetDistance = distance;
+                closetDistacne = distance;
                 closet = colliders[i].transform;
-                
             }
         }
-
 
         return closet;
     }
 
     public override void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
     {
-        if(IsDead)
+        if (IsDead)
         {
-            
-            
             return;
         }
         base.OnDamage(damage, hitPoint, hitNormal);
 
+        uiZombieHealth.fillAmount = Health / startingHealth;
         zombieAudioSource.PlayOneShot(hitClip);
         bloodEffect.transform.position = hitPoint;
         bloodEffect.transform.forward = hitNormal;
         bloodEffect.Play();
     }
 
+    // IEnumerator OnAttack()
+    // {
+    //     zombieHitBox.SetActive(true);
+    //     yield return new WaitForSeconds(0.5f);
+    //     //hitbox를 활성화하고 0.5초 후에 공격을 처리
+
+    //     // hitbox에 닿으면 그 충돌체에 IDamageable 인터페이스가 있는지 확인하고, 
+    //     // 있다면 OnDamage를 호출하여 데미지를 입힘
+        
+    //     if (Time.time >= lastAttackTime + 1f)
+    //     {
+    //         lastAttackTime = Time.time;
+
+    //         if (target != null)
+    //         {
+    //             IDamageable damageable = target.GetComponent<IDamageable>();
+    //             if (damageable != null)
+    //             {
+    //                 damageable.OnDamage(damage, target.position, -target.forward);
+                    
+    //             }
+    //         }
+    //     }
+    //     zombieHitBox.SetActive(false);
+    //     StartCoroutine(OnAttack());
+    // }
+
     public override void Die()
     {
         base.Die();
 
-                zombieAnimator.SetTrigger(IdDie);
-        zombieAudioSource.PlayOneShot(deathClip);
-
-
-
         CurrentStatus = Status.Die;
     }
-
 }

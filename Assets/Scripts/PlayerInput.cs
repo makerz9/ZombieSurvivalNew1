@@ -1,3 +1,4 @@
+using System.ComponentModel.Design.Serialization;
 using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
@@ -7,31 +8,18 @@ public class PlayerInput : MonoBehaviour
     public static readonly string FireAxis = "Fire1";
     public static readonly string ReloadAxis = "Reload";
 
+    public float Move { get; private set; }
+    public float Rotate { get; private set; }
+    public bool Fire { get; private set; }
+    public bool Reload { get; private set; }
 
-
-    public float Move{get; private set;}
-    public float Rotate{get; private set;}
-    public bool Fire{get; private set;}
-    public bool Reload{get; private set;}
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
         Move = Input.GetAxis(MoveAxis);
         Rotate = Input.GetAxis(RotateAxis);
         Fire = Input.GetButton(FireAxis);
         Reload = Input.GetButtonDown(ReloadAxis);
 
-        //Debug.Log($"{Move} / {Rotate} / {Fire} / {Reload}");
+        // Debug.Log($"{Move} / {Rotate} / {Fire} / {Reload}");
     }
-
-    
-
 }

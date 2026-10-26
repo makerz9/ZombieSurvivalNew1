@@ -1,31 +1,28 @@
-using System.Security.Cryptography.X509Certificates;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerHealth : LivingEntity
 {
-    public readonly static int IdDie = Animator.StringToHash("Die");
+    public static readonly int IdDie = Animator.StringToHash("Die");
+
+    public Image uiHealth;
 
     public AudioClip hitClip;
     public AudioClip deathClip;
 
     private AudioSource playerAudioSource;
     private Animator playerAnimator;
-    
+
     private PlayerMovement playerMovement;
     private PlayerInput playerInput;
-
 
     private void Awake()
     {
         playerAudioSource = GetComponent<AudioSource>();
         playerAnimator = GetComponent<Animator>();
-
         playerMovement = GetComponent<PlayerMovement>();
         playerInput = GetComponent<PlayerInput>();
     }
-
-
-
 
     protected override void OnEnable()
     {
@@ -33,30 +30,20 @@ public class PlayerHealth : LivingEntity
 
         playerMovement.enabled = true;
         playerInput.enabled = true;
+
+        uiHealth.gameObject.SetActive(true);
+        uiHealth.fillAmount = Health / startingHealth;
     }
-
-    void Start()
-    {
-        
-    }
-
-
-    void Update()
-    {
-
-    }
-
 
     public override void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
     {
-        if(!IsDead)
+        if (!IsDead)
         {
             playerAudioSource.PlayOneShot(hitClip);
         }
-        
 
         base.OnDamage(damage, hitPoint, hitNormal);
-        Debug.Log(Health);
+        uiHealth.fillAmount = Health / startingHealth;
     }
 
     public override void Die()
@@ -68,9 +55,7 @@ public class PlayerHealth : LivingEntity
 
         playerMovement.enabled = false;
         playerInput.enabled = false;
+
+
     }
-
-
-
-
 }

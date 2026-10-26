@@ -9,13 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 49a39db0049b4164890fdeb5e92542ca, type: 3}
+  m_Script: {fileID: 11500000, guid: cfa6f9e02e3661947a986c59e3d0b63c, type: 3}
   m_Name: GunData
   m_EditorClassIdentifier: Assembly-CSharp::GunData
   shotClip: {fileID: 8300000, guid: b82a66dab749415458d1f6600c997095, type: 3}
   reloadClip: {fileID: 8300000, guid: 9eca29ee7f8209e419470fcd586aec21, type: 3}
   damage: 25
   startAmmoRemain: 80
-  magCapacity: 26
+  magCapacity: 25
   timeBetFire: 0.12
-  reloadTime: 1
+  reloadTime: 1.8

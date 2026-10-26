@@ -1,8 +1,10 @@
+// using Unity.Android.Gradle.Manifest;
+// using UnityEditor.TerrainTools;
 using UnityEngine;
 
 public class PlayerShooter : MonoBehaviour
 {
-    public static readonly int IdReaload = Animator.StringToHash("Reload");
+    public static readonly int IdReload = Animator.StringToHash("Reload");
 
     public Gun gun;
 
@@ -17,31 +19,18 @@ public class PlayerShooter : MonoBehaviour
     {
         playerAnimator = GetComponent<Animator>();
         playerInput = GetComponent<PlayerInput>();
-
-        GameObject go = GameObject.FindWithTag("Gun");
-        gun = go.GetComponent<Gun>();
     }
 
     private void Update()
     {
-        if(playerInput.Fire)
+        if (playerInput.Fire)
         {
             gun.Fire();
         }
-        else if(playerInput.Reload && gun.Reload())
+        else if (playerInput.Reload && gun.Reload())
         {
-            playerAnimator.SetTrigger(IdReaload);
-
+            playerAnimator.SetTrigger(IdReload);
         }
-        // else if(playerInput.Reload)
-        // {
-        //     if(gun.magAmmo < gun.maxMagAmmo && !gun.isReloading)
-        //     {
-        //         gun.Reload();
-        //         playerAnimator.SetTrigger("Reload");
-        //     }
-
-        // }
     }
 
     private void OnAnimatorIK(int layerIndex)
@@ -52,12 +41,10 @@ public class PlayerShooter : MonoBehaviour
         playerAnimator.SetIKRotationWeight(AvatarIKGoal.LeftHand, 1f);
         playerAnimator.SetIKPosition(AvatarIKGoal.LeftHand, leftHandMouht.position);
         playerAnimator.SetIKRotation(AvatarIKGoal.LeftHand, leftHandMouht.rotation);
-        
+
         playerAnimator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1f);
         playerAnimator.SetIKRotationWeight(AvatarIKGoal.RightHand, 1f);
         playerAnimator.SetIKPosition(AvatarIKGoal.RightHand, rightHandMouht.position);
         playerAnimator.SetIKRotation(AvatarIKGoal.RightHand, rightHandMouht.rotation);
     }
-
-
 }

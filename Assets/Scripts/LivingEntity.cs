@@ -1,35 +1,31 @@
 using UnityEngine;
-using UnityEngine.Events; 
+using UnityEngine.Events;
 
 public class LivingEntity : MonoBehaviour, IDamageable
 {
     public float startingHealth = 100f;
-    public float Health {get; private set;}
-    public bool IsDead {get; private set;}
+    public float Health { get; private set; }
+    public bool IsDead { get; private set; }
 
-    public UnityEvent OnDead;//죽었을때 호출할 함수 등록
+    public UnityEvent OnDead;
 
     protected virtual void OnEnable()
     {
         IsDead = false;
         Health = startingHealth;
-        
     }
 
-
-    //crtl + . = 인터페이스 구현
     public virtual void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
     {
-        if(IsDead)
+        if (IsDead)
         {
             return;
         }
 
         Health -= damage;
-        if(Health <= 0)
+        if (Health <= 0f)
         {
-            Health = 0;
-
+            Health = 0f;
             Die();
         }
     }
@@ -38,17 +34,5 @@ public class LivingEntity : MonoBehaviour, IDamageable
     {
         IsDead = true;
         OnDead.Invoke();
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 }
