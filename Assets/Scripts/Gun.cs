@@ -13,7 +13,7 @@ public class Gun : MonoBehaviour
         Reloading,
     }
 
-    public State state {get; private set;}
+    public State CurrentState {get; private set;}
 
     public Transform fireTransform;
 
@@ -40,7 +40,7 @@ public class Gun : MonoBehaviour
 
     public bool isReloading = false;
 
-    public UIManager uIManager;
+    public UIManager uiManager;
 
 
 
@@ -59,16 +59,16 @@ public class Gun : MonoBehaviour
     {
         ammoRemain = gunData.startAmmoRemain;
         magAmmo = gunData.magCapacity;
-        uIManager.SetAmmoText(magAmmo, ammoRemain);
+        uiManager.SetAmmoText(magAmmo, ammoRemain);
 
-        state = State.Ready;
+        CurrentState = State.Ready;
         lastFireTime = 0f;
         magAmmo = maxMagAmmo;
     }
 
     public void Fire()
     {
-        if(state == State.Ready && Time.time >= lastFireTime + gunData.timeBetFire)
+        if(CurrentState == State.Ready && Time.time >= lastFireTime + gunData.timeBetFire)
         {
             lastFireTime = Time.time;
             Shoot();
@@ -86,6 +86,7 @@ public class Gun : MonoBehaviour
         {
             hitPosition = hit.point;
             Debug.Log(hit.collider. name);
+            
             IDamageable target = hit.collider.GetComponent<IDamageable>();
             if (target != null)
             {
@@ -98,17 +99,17 @@ public class Gun : MonoBehaviour
 
         }
 
-        StartCoroutine(ShootEffect(hitPosition));
+        StartCoroutine(CoShootEffect(hitPosition));
 
         magAmmo--;
-        uIManager.SetAmmoText(magAmmo, ammoRemain);
+        uiManager.SetAmmoText(magAmmo, ammoRemain);
         if(magAmmo <= 0)
         {
-            state = State.Empty;
+            CurrentState = State.Empty;
         }
     }
 
-    private IEnumerator ShootEffect(Vector3 hitPosition)
+    private IEnumerator CoShootEffect(Vector3 hitPosition)
     {
         muzzleFlashEffect.Play();
         shellEjectEffect.Play();
@@ -136,58 +137,81 @@ public class Gun : MonoBehaviour
 
     }
 
+    //
     public bool Reload()
     {
-        StartCoroutine(ReloadRoutine());
+        //StartCoroutine(CoReloadRoutine());
 
-        return false;
+        //수업 방법
+        if(CurrentState == State.Reloading || ammoRemain <= 0 || magAmmo >= maxMagAmmo)
+        {
+            return false;
+        }
+        StartCoroutine(CoReloadRoutine());
+
+        return true;
     }
 
-    private IEnumerator ReloadRoutine()
+    private IEnumerator CoReloadRoutine()
     {
-        
-        isReloading = true;
-        state = State.Reloading;
+        CurrentState = State.Reloading;
         gunAudioPlayer.PlayOneShot(gunData.reloadClip);
-
-
-        Debug.Log(ammoRemain);
-        Debug.Log(magAmmo);
         yield return new WaitForSeconds(gunData.reloadTime);
+
+        int ammoToFill = Mathf.Min(ammoRemain, gunData.magCapacity - magAmmo, ammoRemain);
+
+        magAmmo += ammoToFill;
+        ammoRemain -= ammoToFill;
+
+        uiManager.SetAmmoText(magAmmo, ammoRemain);
+
+        CurrentState = State.Ready;
+
+        
+        #region 
+        // isReloading = true;
+        // state = State.Reloading;
+        // gunAudioPlayer.PlayOneShot(gunData.reloadClip);
+
+
+        // Debug.Log(ammoRemain);
+        // Debug.Log(magAmmo);
+        // yield return new WaitForSeconds(gunData.reloadTime);
         
 
         
-        // 25 - 0
-        // 25 - 10 = 15개 충전
-        // 최대 25개
+        // // 25 - 0
+        // // 25 - 10 = 15개 충전
+        // // 최대 25개
 
-        if(ammoRemain > 0)
-        {
-            int refillAmmo = maxMagAmmo - magAmmo;
-            //
-            // 15 / 5 라면 리필이 10개
-            //  ||| 10재장전 > 5(남은거)
-            // / 
-            if(refillAmmo >= ammoRemain) //재장전이 남은거보다 큼 그럼 재장전량 - 남은거
-            {
-                // 10개에 4개 남아있으면 4개만 되야함
-                //
-                //int tempAmmo = refillAmmo;
-                refillAmmo = ammoRemain;
+        // if(ammoRemain > 0)
+        // {
+        //     int refillAmmo = maxMagAmmo - magAmmo;
+        //     //
+        //     // 15 / 5 라면 리필이 10개
+        //     //  ||| 10재장전 > 5(남은거)
+        //     // / 
+        //     if(refillAmmo >= ammoRemain) //재장전이 남은거보다 큼 그럼 재장전량 - 남은거
+        //     {
+        //         // 10개에 4개 남아있으면 4개만 되야함
+        //         //
+        //         //int tempAmmo = refillAmmo;
+        //         refillAmmo = ammoRemain;
 
-            }
-            Debug.Log("재장전완료");
-            magAmmo += refillAmmo;
-            ammoRemain -= refillAmmo;
-            uIManager.SetAmmoText(magAmmo, ammoRemain); 
+        //     }
+        //     Debug.Log("재장전완료");
+        //     magAmmo += refillAmmo;
+        //     ammoRemain -= refillAmmo;
+        //     uIManager.SetAmmoText(magAmmo, ammoRemain); 
 
-        }
+        // }
 
         
-        state = State.Ready;
+        // state = State.Ready;
 
-        yield return new WaitForSeconds(0.5f);
-        isReloading = false;
+        // yield return new WaitForSeconds(0.5f);
+        // isReloading = false;
+        #endregion
     }
 
 

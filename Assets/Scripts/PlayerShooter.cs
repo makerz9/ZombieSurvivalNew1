@@ -28,15 +28,20 @@ public class PlayerShooter : MonoBehaviour
         {
             gun.Fire();
         }
-        else if(playerInput.Reload)
+        else if(playerInput.Reload && gun.Reload())
         {
-            if(gun.magAmmo < gun.maxMagAmmo && !gun.isReloading)
-            {
-                gun.Reload();
-                playerAnimator.SetTrigger("Reload");
-            }
+            playerAnimator.SetTrigger(IdReaload);
 
         }
+        // else if(playerInput.Reload)
+        // {
+        //     if(gun.magAmmo < gun.maxMagAmmo && !gun.isReloading)
+        //     {
+        //         gun.Reload();
+        //         playerAnimator.SetTrigger("Reload");
+        //     }
+
+        // }
     }
 
     private void OnAnimatorIK(int layerIndex)
