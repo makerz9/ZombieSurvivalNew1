@@ -86,7 +86,7 @@ public class Gun : MonoBehaviour
         {
             hitPosition = hit.point;
             Debug.Log(hit.collider. name);
-            
+
             IDamageable target = hit.collider.GetComponent<IDamageable>();
             if (target != null)
             {
@@ -122,7 +122,7 @@ public class Gun : MonoBehaviour
         yield return new WaitForSeconds(1f);
 
         bulletLineRenderer.enabled = false;
-        Debug.Log("2");
+        //Debug.Log("2");
 
 
     }

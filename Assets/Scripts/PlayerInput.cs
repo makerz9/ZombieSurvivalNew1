@@ -29,7 +29,7 @@ public class PlayerInput : MonoBehaviour
         Fire = Input.GetButton(FireAxis);
         Reload = Input.GetButtonDown(ReloadAxis);
 
-        Debug.Log($"{Move} / {Rotate} / {Fire} / {Reload}");
+        //Debug.Log($"{Move} / {Rotate} / {Fire} / {Reload}");
     }
 
     

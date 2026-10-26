@@ -35,6 +35,7 @@ public class Zombie : LivingEntity
 
     private Status currentStatus;
     public static readonly int IdHasTarget = Animator.StringToHash("HasTarget");
+        public static readonly int IdDie = Animator.StringToHash("Die");
 
     public Status CurrentStatus
     {
@@ -42,6 +43,7 @@ public class Zombie : LivingEntity
         set
         {
             currentStatus = value;
+            Debug.Log(currentStatus);
 
             //스위치문
             switch (currentStatus)
@@ -61,13 +63,18 @@ public class Zombie : LivingEntity
                     agent.isStopped = true;
                     break;
                 case Status.Die:
-                    zombieAnimator.SetBool("HasTarget", false);
                     agent.isStopped = true;
+                    zombieAnimator.SetTrigger("IdDie");
+                    zombieCollider.enabled = false;
+                    zombieAudioSource.PlayOneShot(deathClip);
                     break;
-                    //열거영 스위치 사용가능
+                    //열거형 스위치 사용가능
 
             }
         }
+
+        
+        
     }
     private void Awake()
     {
@@ -116,6 +123,11 @@ public class Zombie : LivingEntity
                 break;
                 //열거영 스위치 사용가능
 
+        }
+
+        if(Input.GetKeyDown(KeyCode.Space))
+        {
+            OnDamage(10f, Vector3.zero, Vector3.zero);
         }
     }
 
@@ -179,6 +191,34 @@ public class Zombie : LivingEntity
 
 
         return closet;
+    }
+
+    public override void OnDamage(float damage, Vector3 hitPoint, Vector3 hitNormal)
+    {
+        if(IsDead)
+        {
+            
+            
+            return;
+        }
+        base.OnDamage(damage, hitPoint, hitNormal);
+
+        zombieAudioSource.PlayOneShot(hitClip);
+        bloodEffect.transform.position = hitPoint;
+        bloodEffect.transform.forward = hitNormal;
+        bloodEffect.Play();
+    }
+
+    public override void Die()
+    {
+        base.Die();
+
+                zombieAnimator.SetTrigger(IdDie);
+        zombieAudioSource.PlayOneShot(deathClip);
+
+
+
+        CurrentStatus = Status.Die;
     }
 
 }
