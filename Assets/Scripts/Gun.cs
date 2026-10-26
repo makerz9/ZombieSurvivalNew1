@@ -104,7 +104,7 @@ public class Gun : MonoBehaviour
 
         bulletLineRenderer.enabled = false;
     }
-
+    
     public bool Reload()
     {
         if (CurrentState == State.Realoding || ammoRemain <= 0 || magAmmo >= gunData.magCapacity)
