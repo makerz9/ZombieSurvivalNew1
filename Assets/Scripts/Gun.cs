@@ -30,6 +30,12 @@ public class Gun : MonoBehaviour
 
     public UIManager uiManager;
 
+    public void AddAmmo(int add)
+    {
+        ammoRemain += add;
+        uiManager.SetAmmoText(magAmmo, ammoRemain);
+    }
+
     private void Awake()
     {
         bulletLineRenderer = GetComponent<LineRenderer>();

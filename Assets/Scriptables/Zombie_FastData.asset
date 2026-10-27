@@ -15,4 +15,4 @@ MonoBehaviour:
   maxHp: 40
   damage: 20
   speed: 4
-  skinColor: {r: 1, g: 1, b: 1, a: 1}
+  skinColor: {r: 1, g: 0, b: 0, a: 1}

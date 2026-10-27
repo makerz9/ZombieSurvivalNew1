@@ -16,6 +16,7 @@ public class PlayerHealth : LivingEntity
     private PlayerMovement playerMovement;
     private PlayerInput playerInput;
 
+    public UIManager uiManager;
     private void Awake()
     {
         playerAudioSource = GetComponent<AudioSource>();
@@ -44,6 +45,19 @@ public class PlayerHealth : LivingEntity
 
         base.OnDamage(damage, hitPoint, hitNormal);
         uiHealth.fillAmount = Health / startingHealth;
+    }
+
+    public override void AddHealth(int add)
+    {
+        base.AddHealth(add);
+        uiHealth.fillAmount = Health / startingHealth;
+    }
+
+    public override void AddScore(int score)
+    {
+        base.AddScore(score);
+        uiManager.SetScoreText(Score);
+        //Debug.Log("ㅅsdfsdfㅂ" + Score);
     }
 
     public override void Die()

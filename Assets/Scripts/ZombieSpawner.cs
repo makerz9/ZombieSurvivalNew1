@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class ZombieSpawner : MonoBehaviour
 {
+    private GameManager gameManager;
     public UIManager uiManager;
     public Zombie zombiePrefab;
     public ZombieData[] zombieDatas;
@@ -13,6 +15,13 @@ public class ZombieSpawner : MonoBehaviour
     private readonly List<Zombie> zombiePool = new List<Zombie>();
 
     private int wave = 0;
+    private void Start()
+    {
+        GameObject findGo = GameObject.FindWithTag("GameController");
+        gameManager = findGo.GetComponent<GameManager>();
+        uiManager = findGo.GetComponent<UIManager>();
+
+    }
 
     private void Update()
     {
@@ -46,6 +55,11 @@ public class ZombieSpawner : MonoBehaviour
             zombie = Instantiate(zombiePrefab, point.position, point.rotation);
             zombie.gameObject.SetActive(false);
             zombiePool.Add(zombie);
+
+            zombie.OnDead.AddListener(() => zombies.Remove(zombie));
+            zombie.OnDead.AddListener(() => uiManager.SetWaveText(wave, zombies.Count));
+            zombie.OnDead.AddListener(() => StartCoroutine(CoReturnToPoolZombie(zombie)));
+            zombie.OnDead.AddListener(() => gameManager.AddScore(50));
         }
         zombie = zombiePool[0];
         zombie.Setup(data);
@@ -56,9 +70,7 @@ public class ZombieSpawner : MonoBehaviour
         zombies.Add(zombie);
         zombiePool.Remove(zombie);
 
-        zombie.OnDead.AddListener(() => zombies.Remove(zombie));
-        zombie.OnDead.AddListener(() => uiManager.SetWaveText(wave, zombies.Count));
-        zombie.OnDead.AddListener(() => StartCoroutine(CoReturnToPoolZombie(zombie)));
+        
     }
 
     private IEnumerator CoReturnToPoolZombie(Zombie zombie)
@@ -66,5 +78,18 @@ public class ZombieSpawner : MonoBehaviour
         yield return new WaitForSeconds(5f);
         zombie.gameObject.SetActive(false);
         zombiePool.Add(zombie);
+    }
+
+    public void OnEndGame()
+    {
+        for(int i = zombies.Count - 1; i>=0; --i)
+        {
+            zombies[i].Die();
+        }
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadScene("Game");
     }
 }
